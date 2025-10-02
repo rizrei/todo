@@ -50,6 +50,7 @@ defmodule Todo.Server do
   end
 end
 
+# Todo.Cache.start()
 # {:ok, pid} = Todo.Server.start()
 # Todo.Server.delete_entry(pid, 1)
 # Todo.Server.entries(pid, ~D[2024-01-01])

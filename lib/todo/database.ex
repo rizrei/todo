@@ -17,17 +17,22 @@ defmodule Todo.Database do
     GenServer.cast(__MODULE__, {:store, key, data})
   end
 
+  #### Callbacks
+
+  @impl true
   def init(%{pool_size: pool_size}) do
     {:ok, %{pool_size: pool_size, workers: initialize_workers(pool_size)}}
   end
 
+  @impl true
   def handle_cast({:store, key, data}, state) do
     key |> choose_worker(state) |> GenServer.cast({:store, key, data})
     {:noreply, state}
   end
 
+  @impl true
   def handle_call({:get, key}, _from, state) do
-    data = choose_worker(key, state) |> GenServer.call({:get, key})
+    data = key |> choose_worker(state) |> GenServer.call({:get, key})
     {:reply, data, state}
   end
 
