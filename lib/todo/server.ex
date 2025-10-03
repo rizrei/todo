@@ -1,4 +1,9 @@
 defmodule Todo.Server do
+  @moduledoc """
+  A server process that manages a single todo list, providing an interface for adding, deleting,
+  and querying todo entries. It persists the todo list using `Todo.Database`.
+  """
+
   alias Todo.Database
   use GenServer
 

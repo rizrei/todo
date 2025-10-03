@@ -1,4 +1,9 @@
 defmodule Todo.Database do
+  @moduledoc """
+  A simple key-value store for persisting todo lists to the filesystem.
+  It uses a pool of worker processes to handle concurrent read and write operations.
+  """
+
   use GenServer
 
   alias Todo.DatabaseWorker

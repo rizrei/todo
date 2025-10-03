@@ -1,4 +1,7 @@
 defmodule Todo.DatabaseWorker do
+  @moduledoc """
+  A worker process responsible for storing and retrieving todo list data from the filesystem.
+  """
   use GenServer
 
   def start(db_folder) do

@@ -1,4 +1,8 @@
 defmodule Todo.Cache do
+  @moduledoc """
+  Manages `Todo.Server` processes by name, starting new ones on demand and caching them for reuse.
+  """
+
   alias Todo.{Database, Server}
   use GenServer
 
@@ -36,7 +40,7 @@ defmodule Todo.Cache do
 end
 
 # {:ok, cache_pid} = Todo.Cache.start
-# alice_pid = Todo.Cache.server_process(cache_pid, "Alice")
+# alice_pid = Todo.Cache.server_process(cache_pid, "Alice's List")
 # Todo.Server.entries(alice_pid, ~D[2024-01-01])
 # Todo.Server.add_entry(alice_pid, %{date: ~D[2024-01-01], title: "Title1"})
 # Todo.Server.delete_entry(alice_pid, 3)

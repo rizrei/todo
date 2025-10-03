@@ -1,10 +1,12 @@
 defmodule Todo.List do
-  @moduledoc false
+  @moduledoc """
+  In-memory todo list with CRUD operations and date filtering.
+  """
 
   defstruct next_id: 1, entries: %{}
 
-  @type new_entry :: %{data: Calendar.date(), title: String.t()}
-  @type entry :: %{id: pos_integer(), data: Calendar.date(), title: String.t()}
+  @type new_entry :: %{date: Calendar.date(), title: String.t()}
+  @type entry :: %{id: pos_integer(), date: Calendar.date(), title: String.t()}
   @type entries :: %{pos_integer() => entry()}
   @type todo_list :: %Todo.List{next_id: pos_integer(), entries: entries()}
   @type updater_fun :: (fun() -> {:ok, entry()} | {:error, any()})
@@ -27,7 +29,7 @@ defmodule Todo.List do
     Map.fetch(entries, entry_id)
   end
 
-  @spec entries(todo_list(), Calendar.date()) :: list(entry()) | []
+  @spec entries(todo_list(), Calendar.date()) :: [entry()]
   def entries(%Todo.List{entries: entries}, date) do
     entries
     |> Map.values()

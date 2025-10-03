@@ -1,5 +1,10 @@
 defmodule TodoList.CsvImporter do
-  @spec import(String.t()) :: list(%{data: Calendar.date(), title: String.t()})
+  @moduledoc """
+  Utility module to import todo entries from a CSV file.
+  """
+
+  @type entry() :: %{data: Calendar.date(), title: String.t()}
+  @spec import(String.t()) :: [entry()]
   def import(file_path) do
     file_path
     |> File.stream!()
