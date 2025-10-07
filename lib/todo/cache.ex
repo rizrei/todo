@@ -1,4 +1,6 @@
 defmodule Todo.Cache do
+  require Logger
+
   @moduledoc """
   Manages `Todo.Server` processes by name, starting new ones on demand and caching them for reuse.
   """
@@ -6,16 +8,17 @@ defmodule Todo.Cache do
   alias Todo.{Database, Server}
   use GenServer
 
-  def start() do
-    GenServer.start(__MODULE__, nil)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
-  def server_process(cache_pid, todo_list_name) do
-    GenServer.call(cache_pid, {:server_process, todo_list_name})
+  def server_process(todo_list_name) do
+    GenServer.call(__MODULE__, {:server_process, todo_list_name})
   end
 
   @impl true
   def init(_) do
+    Logger.info("Starting to-do cache")
     {:ok, %{}, {:continue, :start_database}}
   end
 
@@ -39,8 +42,10 @@ defmodule Todo.Cache do
   end
 end
 
-# {:ok, cache_pid} = Todo.Cache.start
-# alice_pid = Todo.Cache.server_process(cache_pid, "Alice's List")
+# Supervisor.start_link([{Todo.Cache, nil}], strategy: :one_for_one)
+# alice_pid = Todo.Cache.server_process("Alice's List")
+# bob_pid = Todo.Cache.server_process("Alice's List")
 # Todo.Server.entries(alice_pid, ~D[2024-01-01])
 # Todo.Server.add_entry(alice_pid, %{date: ~D[2024-01-01], title: "Title1"})
 # Todo.Server.delete_entry(alice_pid, 3)
+# Process.whereis(Todo.Cache) |> Process.exit(:kill) # пример убийства процесса

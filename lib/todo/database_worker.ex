@@ -1,4 +1,6 @@
 defmodule Todo.DatabaseWorker do
+  require Logger
+
   @moduledoc """
   A worker process responsible for storing and retrieving todo list data from the filesystem.
   """
@@ -21,6 +23,7 @@ defmodule Todo.DatabaseWorker do
   @impl true
   def init(db_folder) do
     File.mkdir_p!(db_folder)
+    Logger.info("Starting database worker")
     {:ok, %{db_folder: db_folder}}
   end
 

@@ -1,4 +1,6 @@
 defmodule Todo.Server do
+  require Logger
+
   @moduledoc """
   A server process that manages a single todo list, providing an interface for adding, deleting,
   and querying todo entries. It persists the todo list using `Todo.Database`.
@@ -27,6 +29,7 @@ defmodule Todo.Server do
 
   @impl true
   def init(name) do
+    Logger.info("Starting todo server for #{name}")
     {:ok, {name, nil}, {:continue, :init}}
   end
 

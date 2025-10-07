@@ -1,4 +1,6 @@
 defmodule Todo.Database do
+  require Logger
+
   @moduledoc """
   A simple key-value store for persisting todo lists to the filesystem.
   It uses a pool of worker processes to handle concurrent read and write operations.
@@ -26,6 +28,7 @@ defmodule Todo.Database do
 
   @impl true
   def init(%{pool_size: pool_size}) do
+    Logger.info("Starting database with pool size #{pool_size}")
     {:ok, %{pool_size: pool_size, workers: initialize_workers(pool_size)}}
   end
 
