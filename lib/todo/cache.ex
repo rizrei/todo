@@ -41,11 +41,3 @@ defmodule Todo.Cache do
     end
   end
 end
-
-# Supervisor.start_link([{Todo.Cache, nil}], strategy: :one_for_one)
-# alice_pid = Todo.Cache.server_process("Alice's List")
-# bob_pid = Todo.Cache.server_process("Alice's List")
-# Todo.Server.entries(alice_pid, ~D[2024-01-01])
-# Todo.Server.add_entry(alice_pid, %{date: ~D[2024-01-01], title: "Title1"})
-# Todo.Server.delete_entry(alice_pid, 3)
-# Process.whereis(Todo.Cache) |> Process.exit(:kill) # пример убийства процесса
