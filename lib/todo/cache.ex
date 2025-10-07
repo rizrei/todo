@@ -24,7 +24,7 @@ defmodule Todo.Cache do
 
   @impl true
   def handle_continue(:start_database, state) do
-    Database.start()
+    Database.start_link()
     {:noreply, state}
   end
 
@@ -35,7 +35,7 @@ defmodule Todo.Cache do
         {:reply, todo_server, todo_servers}
 
       :error ->
-        {:ok, new_server} = Server.start(todo_list_name)
+        {:ok, new_server} = Server.start_link(todo_list_name)
         todo_servers = Map.put(todo_servers, todo_list_name, new_server)
         {:reply, new_server, todo_servers}
     end
