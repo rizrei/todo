@@ -6,55 +6,40 @@ defmodule Todo.Database do
   It uses a pool of worker processes to handle concurrent read and write operations.
   """
 
-  use GenServer
-
   alias Todo.DatabaseWorker
 
   @db_folder "./persist"
   @pool_size 4
 
-  def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
+  def start_link do
+    Logger.info("Starting database with pool size #{@pool_size}")
+    File.mkdir_p!(@db_folder)
+    children = Enum.map(1..@pool_size, &worker_spec/1)
+    Supervisor.start_link(children, strategy: :one_for_one)
   end
 
   def get(key) do
-    GenServer.call(__MODULE__, {:get, key})
+    key |> choose_worker() |> DatabaseWorker.get(key)
   end
 
   def store(key, data) do
-    GenServer.cast(__MODULE__, {:store, key, data})
+    key |> choose_worker() |> DatabaseWorker.store(key, data)
   end
 
-  #### Callbacks
-
-  @impl true
-  def init(_) do
-    pool_size = @pool_size
-    Logger.info("Starting database with pool size #{pool_size}")
-    {:ok, %{pool_size: pool_size, workers: initialize_workers(pool_size)}}
+  def child_spec(_) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, []},
+      type: :supervisor
+    }
   end
 
-  @impl true
-  def handle_cast({:store, key, data}, state) do
-    key |> choose_worker(state) |> GenServer.cast({:store, key, data})
-    {:noreply, state}
+  defp choose_worker(key) do
+    :erlang.phash2(key, @pool_size) + 1
   end
 
-  @impl true
-  def handle_call({:get, key}, _from, state) do
-    data = key |> choose_worker(state) |> GenServer.call({:get, key})
-    {:reply, data, state}
-  end
-
-  defp choose_worker(key, %{pool_size: pool_size, workers: workers}) do
-    workers |> Map.get(:erlang.phash2(key, pool_size))
-  end
-
-  defp initialize_workers(pool_size) do
-    0..(pool_size - 1)
-    |> Enum.reduce(%{}, fn key, acc ->
-      {:ok, pid} = DatabaseWorker.start_link(@db_folder)
-      Map.put(acc, key, pid)
-    end)
+  defp worker_spec(worker_id) do
+    default_worker_spec = {Todo.DatabaseWorker, {@db_folder, worker_id}}
+    Supervisor.child_spec(default_worker_spec, id: worker_id)
   end
 end

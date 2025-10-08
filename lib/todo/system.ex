@@ -5,13 +5,14 @@ defmodule Todo.System do
 
   use Supervisor
 
-  def start_link do
+  def start_link(_) do
     Supervisor.start_link(__MODULE__, nil)
   end
 
   @impl true
   def init(_) do
     children = [
+      Todo.ProcessRegistry,
       Todo.Database,
       Todo.Cache
     ]

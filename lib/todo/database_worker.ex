@@ -1,30 +1,30 @@
 defmodule Todo.DatabaseWorker do
-  require Logger
-
   @moduledoc """
   A worker process responsible for storing and retrieving todo list data from the filesystem.
   """
+
   use GenServer
+  require Logger
 
-  def start_link(db_folder) do
-    GenServer.start_link(__MODULE__, db_folder)
+  def start_link({db_folder, worker_id}) do
+    GenServer.start_link(__MODULE__, {db_folder, worker_id}, name: via_tuple(worker_id))
   end
 
-  def get(pid, key) do
-    GenServer.call(pid, {:get, key})
+  def get(worker_id, key) do
+    GenServer.call(via_tuple(worker_id), {:get, key})
   end
 
-  def store(pid, key, data) do
-    GenServer.cast(pid, {:store, key, data})
+  def store(worker_id, key, data) do
+    GenServer.cast(via_tuple(worker_id), {:store, key, data})
   end
 
   #### Callbacks
 
   @impl true
-  def init(db_folder) do
+  def init({db_folder, worker_id}) do
     File.mkdir_p!(db_folder)
-    Logger.info("Starting database worker")
-    {:ok, %{db_folder: db_folder}}
+    Logger.info("Starting database worker #{worker_id}")
+    {:ok, %{db_folder: db_folder, id: worker_id}}
   end
 
   @impl true
@@ -51,5 +51,9 @@ defmodule Todo.DatabaseWorker do
 
   defp build_file_path(db_folder, key) do
     db_folder |> Path.join(to_string(key))
+  end
+
+  defp via_tuple(worker_id) do
+    Todo.ProcessRegistry.via_tuple({__MODULE__, worker_id})
   end
 end
