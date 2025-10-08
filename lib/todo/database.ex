@@ -11,9 +11,10 @@ defmodule Todo.Database do
   alias Todo.DatabaseWorker
 
   @db_folder "./persist"
+  @pool_size 4
 
-  def start_link(pool_size \\ 3) do
-    GenServer.start_link(__MODULE__, %{pool_size: pool_size}, name: __MODULE__)
+  def start_link(_) do
+    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   def get(key) do
@@ -27,7 +28,8 @@ defmodule Todo.Database do
   #### Callbacks
 
   @impl true
-  def init(%{pool_size: pool_size}) do
+  def init(_) do
+    pool_size = @pool_size
     Logger.info("Starting database with pool size #{pool_size}")
     {:ok, %{pool_size: pool_size, workers: initialize_workers(pool_size)}}
   end

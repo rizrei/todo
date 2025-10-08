@@ -1,12 +1,11 @@
 defmodule Todo.Cache do
-  require Logger
-
   @moduledoc """
   Manages `Todo.Server` processes by name, starting new ones on demand and caching them for reuse.
   """
 
-  alias Todo.{Database, Server}
   use GenServer
+  require Logger
+  alias Todo.Server
 
   def start_link(_) do
     GenServer.start_link(__MODULE__, nil, name: __MODULE__)
@@ -19,13 +18,7 @@ defmodule Todo.Cache do
   @impl true
   def init(_) do
     Logger.info("Starting to-do cache")
-    {:ok, %{}, {:continue, :start_database}}
-  end
-
-  @impl true
-  def handle_continue(:start_database, state) do
-    Database.start_link()
-    {:noreply, state}
+    {:ok, %{}}
   end
 
   @impl true
