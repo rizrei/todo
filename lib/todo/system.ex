@@ -21,7 +21,7 @@ defmodule Todo.System do
   end
 end
 
-# Todo.System.start_link()
+# Todo.System.start_link([])
 # alice_pid = Todo.Cache.server_process("Alice's List")
 # bob_pid = Todo.Cache.server_process("Alice's List")
 # Todo.Server.entries(alice_pid, ~D[2024-01-01])

@@ -10,19 +10,19 @@ defmodule Todo.Server do
   use GenServer
 
   def start_link(todo_list_name) do
-    GenServer.start_link(__MODULE__, todo_list_name)
+    GenServer.start_link(__MODULE__, todo_list_name, name: via_tuple(todo_list_name))
   end
 
-  def add_entry(todo_server, new_entry) do
-    GenServer.cast(todo_server, {:add_entry, new_entry})
+  def add_entry(todo_server_pid, new_entry) do
+    GenServer.cast(todo_server_pid, {:add_entry, new_entry})
   end
 
-  def delete_entry(todo_server, entry_id) do
-    GenServer.cast(todo_server, {:delete_entry, entry_id})
+  def delete_entry(todo_server_pid, entry_id) do
+    GenServer.cast(todo_server_pid, {:delete_entry, entry_id})
   end
 
-  def entries(todo_server, date) do
-    GenServer.call(todo_server, {:entries, date})
+  def entries(todo_server_pid, date) do
+    GenServer.call(todo_server_pid, {:entries, date})
   end
 
   #### Callbacks
@@ -56,12 +56,8 @@ defmodule Todo.Server do
     Database.store(name, new_todo_list)
     {:noreply, {name, new_todo_list}}
   end
-end
 
-# Todo.Cache.start()
-# {:ok, pid} = Todo.Server.start()
-# Todo.Server.delete_entry(pid, 1)
-# Todo.Server.entries(pid, ~D[2024-01-01])
-# Todo.Server.add_entry(pid, %{date: ~D[2024-01-01], title: "Title1"})
-# Todo.Server.add_entry(pid, %{date: ~D[2024-01-01], title: "Title2"})
-# Todo.Server.add_entry(pid, %{date: ~D[2024-01-02], title: "Title3"})
+  defp via_tuple(name) do
+    Todo.ProcessRegistry.via_tuple({__MODULE__, name})
+  end
+end

@@ -3,34 +3,27 @@ defmodule Todo.Cache do
   Manages `Todo.Server` processes by name, starting new ones on demand and caching them for reuse.
   """
 
-  use GenServer
+  use DynamicSupervisor
   require Logger
-  alias Todo.Server
 
   def start_link(_) do
-    GenServer.start_link(__MODULE__, nil, name: __MODULE__)
-  end
-
-  def server_process(todo_list_name) do
-    GenServer.call(__MODULE__, {:server_process, todo_list_name})
+    DynamicSupervisor.start_link(__MODULE__, nil, name: __MODULE__)
   end
 
   @impl true
   def init(_) do
     Logger.info("Starting to-do cache")
-    {:ok, %{}}
+    DynamicSupervisor.init(strategy: :one_for_one)
   end
 
-  @impl true
-  def handle_call({:server_process, todo_list_name}, _, todo_servers) do
-    case Map.fetch(todo_servers, todo_list_name) do
-      {:ok, todo_server} ->
-        {:reply, todo_server, todo_servers}
-
-      :error ->
-        {:ok, new_server} = Server.start_link(todo_list_name)
-        todo_servers = Map.put(todo_servers, todo_list_name, new_server)
-        {:reply, new_server, todo_servers}
+  def server_process(todo_list_name) do
+    case start_child(todo_list_name) do
+      {:ok, pid} -> pid
+      {:error, {:already_started, pid}} -> pid
     end
+  end
+
+  defp start_child(todo_list_name) do
+    DynamicSupervisor.start_child(__MODULE__, {Todo.Server, todo_list_name})
   end
 end
