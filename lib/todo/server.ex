@@ -7,7 +7,7 @@ defmodule Todo.Server do
   """
 
   alias Todo.Database
-  use GenServer
+  use GenServer, restart: :temporary
 
   def start_link(todo_list_name) do
     GenServer.start_link(__MODULE__, todo_list_name, name: via_tuple(todo_list_name))
