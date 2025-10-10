@@ -12,6 +12,7 @@ defmodule Todo.System do
   @impl true
   def init(_) do
     children = [
+      {Todo.Metrics, 5},
       Todo.ProcessRegistry,
       Todo.Database,
       Todo.Cache
