@@ -33,7 +33,7 @@ defmodule Todo.DatabaseWorker do
       data =
         case build_file_path(db_folder, key) |> File.read() do
           {:ok, contents} -> :erlang.binary_to_term(contents)
-          _ -> nil
+          {:error, :enoent} -> nil
         end
 
       GenServer.reply(from, data)
