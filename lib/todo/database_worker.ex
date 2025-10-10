@@ -18,6 +18,16 @@ defmodule Todo.DatabaseWorker do
     GenServer.cast(via_tuple(worker_id), {:store, key, data})
   end
 
+  def child_spec({db_folder, worker_id}) do
+    %{
+      id: {__MODULE__, worker_id},
+      start: {__MODULE__, :start_link, [{db_folder, worker_id}]},
+      restart: :permanent,
+      shutdown: 5_000,
+      type: :worker
+    }
+  end
+
   #### Callbacks
 
   @impl true

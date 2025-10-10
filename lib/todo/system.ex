@@ -22,6 +22,8 @@ defmodule Todo.System do
 end
 
 # Todo.System.start_link([])
+# [{worker_pid, _}] = Registry.lookup(Todo.ProcessRegistry, {Todo.DatabaseWorker, 1})
+# Process.exit(worker_pid, :kill)
 # alice_pid = Todo.Cache.server_process("Alice's List")
 # bob_pid = Todo.Cache.server_process("Alice's List")
 # Todo.Server.entries(alice_pid, ~D[2024-01-01])
