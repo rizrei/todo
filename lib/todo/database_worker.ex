@@ -64,6 +64,6 @@ defmodule Todo.DatabaseWorker do
   end
 
   defp via_tuple(worker_id) do
-    Todo.ProcessRegistry.via_tuple({__MODULE__, worker_id})
+    {:via, Registry, {Todo.ProcessRegistry, {__MODULE__, worker_id}}}
   end
 end

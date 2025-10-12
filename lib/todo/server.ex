@@ -7,57 +7,42 @@ defmodule Todo.Server do
   """
 
   alias Todo.Database
-  use GenServer, restart: :temporary
+  use Agent, restart: :temporary
 
-  def start_link(todo_list_name) do
-    GenServer.start_link(__MODULE__, todo_list_name, name: via_tuple(todo_list_name))
+  def start_link(name) do
+    Agent.start_link(
+      fn ->
+        Logger.info("Starting todo server for #{name}")
+        {name, Database.get(name) || Todo.List.new()}
+      end,
+      name: via_tuple(name)
+    )
   end
 
-  def add_entry(todo_server_pid, new_entry) do
-    GenServer.cast(todo_server_pid, {:add_entry, new_entry})
+  def entries(pid, date) do
+    Agent.get(
+      pid,
+      fn {_name, todo_list} -> Todo.List.entries(todo_list, date) end
+    )
   end
 
-  def delete_entry(todo_server_pid, entry_id) do
-    GenServer.cast(todo_server_pid, {:delete_entry, entry_id})
+  def add_entry(pid, new_entry) do
+    Agent.cast(pid, fn {name, todo_list} ->
+      new_list = Todo.List.add_entry(todo_list, new_entry)
+      Database.store(name, new_list)
+      {name, new_list}
+    end)
   end
 
-  def entries(todo_server_pid, date) do
-    GenServer.call(todo_server_pid, {:entries, date})
-  end
-
-  #### Callbacks
-
-  @impl true
-  def init(name) do
-    Logger.info("Starting todo server for #{name}")
-    {:ok, {name, nil}, {:continue, :init}}
-  end
-
-  @impl true
-  def handle_continue(:init, {name, nil}) do
-    {:noreply, {name, Database.get(name) || Todo.List.new()}}
-  end
-
-  @impl true
-  def handle_call({:entries, date}, _from, {name, todo_list}) do
-    {:reply, Todo.List.entries(todo_list, date), {name, todo_list}}
-  end
-
-  @impl true
-  def handle_cast({:add_entry, new_entry}, {name, todo_list}) do
-    new_todo_list = Todo.List.add_entry(todo_list, new_entry)
-    Database.store(name, new_todo_list)
-    {:noreply, {name, new_todo_list}}
-  end
-
-  @impl true
-  def handle_cast({:delete_entry, entry_id}, {name, todo_list}) do
-    new_todo_list = Todo.List.delete_entry(todo_list, entry_id)
-    Database.store(name, new_todo_list)
-    {:noreply, {name, new_todo_list}}
+  def delete_entry(pid, entry_id) do
+    Agent.cast(pid, fn {name, todo_list} ->
+      new_list = Todo.List.delete_entry(todo_list, entry_id)
+      Database.store(name, new_list)
+      {name, new_list}
+    end)
   end
 
   defp via_tuple(name) do
-    Todo.ProcessRegistry.via_tuple({__MODULE__, name})
+    {:via, Registry, {Todo.ProcessRegistry, {__MODULE__, name}}}
   end
 end
