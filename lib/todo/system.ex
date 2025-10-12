@@ -5,14 +5,14 @@ defmodule Todo.System do
 
   use Supervisor
 
-  def start_link(_) do
+  def start_link do
     Supervisor.start_link(__MODULE__, nil)
   end
 
   @impl true
   def init(_) do
     children = [
-      {Todo.Metrics, 5},
+      # {Todo.Metrics, 5},
       Todo.ProcessRegistry,
       Todo.Database,
       Todo.Cache
@@ -22,7 +22,7 @@ defmodule Todo.System do
   end
 end
 
-# Todo.System.start_link([])
+# Todo.System.start_link()
 # [{worker_pid, _}] = Registry.lookup(Todo.ProcessRegistry, {Todo.DatabaseWorker, 1})
 # Process.exit(worker_pid, :kill)
 # alice_pid = Todo.Cache.server_process("Alice's List")

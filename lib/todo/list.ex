@@ -36,18 +36,23 @@ defmodule Todo.List do
     |> Enum.filter(&(&1.date == date))
   end
 
+  @spec size(todo_list()) :: non_neg_integer()
+  def size(%Todo.List{entries: entries}) do
+    entries |> Map.values() |> length()
+  end
+
   @spec update_entry(todo_list(), pos_integer(), updater_fun()) ::
           {:ok, todo_list()} | {:error, any()}
   def update_entry(todo_list, entry_id, updater_fun) do
     case Map.fetch(todo_list.entries, entry_id) do
       :error ->
-        {:error, todo_list}
+        todo_list
 
       {:ok, old_entry} ->
         old_entry_id = old_entry.id
         new_entry = %{id: ^old_entry_id} = updater_fun.(old_entry)
         new_entries = Map.put(todo_list.entries, new_entry.id, new_entry)
-        {:ok, %Todo.List{todo_list | entries: new_entries}}
+        %Todo.List{todo_list | entries: new_entries}
     end
   end
 

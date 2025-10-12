@@ -1,23 +1,41 @@
 defmodule Todo.CacheTest do
-  use ExUnit.Case, async: true
+  use ExUnit.Case
 
-  setup do
-    {:ok, pid} = Todo.Cache.start_link([])
-    %{cache_pid: pid}
+  setup_all do
+    {:ok, todo_system_pid} = Todo.System.start_link()
+    {:ok, todo_system_pid: todo_system_pid}
   end
 
-  describe "server_process/2" do
-    test "start 2 different todo server processes for each name", %{cache_pid: pid} do
-      alice_pid = Todo.Cache.server_process("Alice")
-      bob_pid = Todo.Cache.server_process("Bob")
+  test "server_process" do
+    bob_pid = Todo.Cache.server_process("bob")
 
-      assert alice_pid != bob_pid
-    end
+    assert bob_pid != Todo.Cache.server_process("alice")
+    assert bob_pid == Todo.Cache.server_process("bob")
+  end
 
-    test "same pid for existing process", %{cache_pid: pid} do
-      alice_pid = Todo.Cache.server_process("Alice")
+  test "to-do operations" do
+    jane = Todo.Cache.server_process("jane")
+    Todo.Server.add_entry(jane, %{date: ~D[2018-12-19], title: "Dentist"})
+    entries = Todo.Server.entries(jane, ~D[2018-12-19])
 
-      assert ^alice_pid = Todo.Cache.server_process("Alice")
-    end
+    assert [%{date: ~D[2018-12-19], title: "Dentist"}] = entries
+
+    on_exit(fn -> File.rm("./persist/jane") end)
+  end
+
+  test "persistence" do
+    john = Todo.Cache.server_process("john")
+    Todo.Server.add_entry(john, %{date: ~D[2018-12-20], title: "Shopping"})
+    assert 1 == length(Todo.Server.entries(john, ~D[2018-12-20]))
+
+    Process.exit(john, :kill)
+
+    entries =
+      "john"
+      |> Todo.Cache.server_process()
+      |> Todo.Server.entries(~D[2018-12-20])
+
+    assert [%{date: ~D[2018-12-20], title: "Shopping"}] = entries
+    on_exit(fn -> File.rm("./persist/john") end)
   end
 end
