@@ -14,12 +14,9 @@ defmodule Todo.Web do
     title = Map.fetch!(conn.params, "title")
     date = Date.from_iso8601!(Map.fetch!(conn.params, "date"))
 
-    r =
-      list_name
-      |> Todo.Cache.server_process()
-      |> Todo.Server.add_entry(%{title: title, date: date})
-
-    IO.inspect(r)
+    list_name
+    |> Todo.Cache.server_process()
+    |> Todo.Server.add_entry(%{title: title, date: date})
 
     conn
     |> Plug.Conn.put_resp_content_type("text/plain")
@@ -60,7 +57,7 @@ defmodule Todo.Web do
   def child_spec(_arg) do
     Plug.Cowboy.child_spec(
       scheme: :http,
-      options: [port: 5454],
+      options: [port: Application.fetch_env!(:todo, :http_port)],
       plug: __MODULE__
     )
   end
