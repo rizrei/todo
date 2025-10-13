@@ -2,8 +2,9 @@ defmodule Todo.CacheTest do
   use ExUnit.Case
 
   # setup_all do
-  #   {:ok, todo_system_pid} = Todo.System.start_link()
-  #   {:ok, todo_system_pid: todo_system_pid}
+  #   on_exit(fn ->
+  #     Application.fetch_env!(:todo, :database_folder) |> File.rm_rf!()
+  #   end)
   # end
 
   test "server_process" do
@@ -20,7 +21,7 @@ defmodule Todo.CacheTest do
 
     assert [%{date: ~D[2018-12-19], title: "Dentist"}] = entries
 
-    on_exit(fn -> File.rm("./persist/jane") end)
+    on_exit(fn -> remove_persisted_file("jane") end)
   end
 
   test "persistence" do
@@ -36,6 +37,12 @@ defmodule Todo.CacheTest do
       |> Todo.Server.entries(~D[2018-12-20])
 
     assert [%{date: ~D[2018-12-20], title: "Shopping"}] = entries
-    on_exit(fn -> File.rm("./persist/john") end)
+    on_exit(fn -> remove_persisted_file("john") end)
+  end
+
+  def remove_persisted_file(list_name) do
+    Application.fetch_env!(:todo, :database_folder)
+    |> Path.join(list_name)
+    |> File.rm!()
   end
 end

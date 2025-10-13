@@ -6,8 +6,8 @@ defmodule Todo.Database do
 
   require Logger
 
-  @db_folder "./persist"
-  @pool_size 4
+  @db_folder Application.compile_env!(:todo, :database_folder)
+  @pool_size Application.compile_env!(:todo, :database_pool_size)
 
   def child_spec(_) do
     File.mkdir_p!(@db_folder)
