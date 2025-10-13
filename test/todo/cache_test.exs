@@ -1,10 +1,10 @@
 defmodule Todo.CacheTest do
   use ExUnit.Case
 
-  setup_all do
-    {:ok, todo_system_pid} = Todo.System.start_link()
-    {:ok, todo_system_pid: todo_system_pid}
-  end
+  # setup_all do
+  #   {:ok, todo_system_pid} = Todo.System.start_link()
+  #   {:ok, todo_system_pid: todo_system_pid}
+  # end
 
   test "server_process" do
     bob_pid = Todo.Cache.server_process("bob")
