@@ -12,10 +12,11 @@ defmodule Todo.System do
   @impl true
   def init(_) do
     children = [
-      # {Todo.Metrics, 5},
+      {Todo.Metrics, 5},
       Todo.ProcessRegistry,
       Todo.Database,
-      Todo.Cache
+      Todo.Cache,
+      Todo.Web
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
