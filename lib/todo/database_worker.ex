@@ -6,35 +6,24 @@ defmodule Todo.DatabaseWorker do
   use GenServer
   require Logger
 
-  def start_link({db_folder, worker_id}) do
-    GenServer.start_link(__MODULE__, {db_folder, worker_id}, name: via_tuple(worker_id))
+  def start_link(db_folder) do
+    GenServer.start_link(__MODULE__, db_folder)
   end
 
-  def get(worker_id, key) do
-    GenServer.call(via_tuple(worker_id), {:get, key})
+  def get(pid, key) do
+    GenServer.call(pid, {:get, key})
   end
 
-  def store(worker_id, key, data) do
-    GenServer.cast(via_tuple(worker_id), {:store, key, data})
-  end
-
-  def child_spec({db_folder, worker_id}) do
-    %{
-      id: {__MODULE__, worker_id},
-      start: {__MODULE__, :start_link, [{db_folder, worker_id}]},
-      restart: :permanent,
-      shutdown: 5_000,
-      type: :worker
-    }
+  def store(pid, key, data) do
+    GenServer.cast(pid, {:store, key, data})
   end
 
   #### Callbacks
 
   @impl true
-  def init({db_folder, worker_id}) do
-    File.mkdir_p!(db_folder)
-    Logger.info("Starting database worker #{worker_id}")
-    {:ok, %{db_folder: db_folder, id: worker_id}}
+  def init(db_folder) do
+    Logger.info("Starting database worker")
+    {:ok, %{db_folder: db_folder}}
   end
 
   @impl true
@@ -61,9 +50,5 @@ defmodule Todo.DatabaseWorker do
 
   defp build_file_path(db_folder, key) do
     db_folder |> Path.join(to_string(key))
-  end
-
-  defp via_tuple(worker_id) do
-    {:via, Registry, {Todo.ProcessRegistry, {__MODULE__, worker_id}}}
   end
 end

@@ -8,7 +8,7 @@ defmodule Todo.Server do
   require Logger
   alias Todo.Database
 
-  @timeout :timer.seconds(10)
+  @timeout :timer.minutes(1)
 
   def start_link(todo_list_name) do
     GenServer.start_link(__MODULE__, todo_list_name, name: via_tuple(todo_list_name))
