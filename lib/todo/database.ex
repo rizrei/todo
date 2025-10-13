@@ -12,15 +12,20 @@ defmodule Todo.Database do
   def child_spec(_) do
     File.mkdir_p!(@db_folder)
 
-    :poolboy.child_spec(
-      __MODULE__,
-      [
-        name: {:local, __MODULE__},
-        worker_module: Todo.DatabaseWorker,
-        size: @pool_size
-      ],
-      [@db_folder]
-    )
+    start =
+      {:poolboy, :start_link,
+       [
+         [name: {:local, __MODULE__}, worker_module: Todo.DatabaseWorker, size: @pool_size],
+         [@db_folder]
+       ]}
+
+    %{
+      id: __MODULE__,
+      start: start,
+      restart: :permanent,
+      shutdown: 5000,
+      type: :worker
+    }
   end
 
   def store(key, data) do
