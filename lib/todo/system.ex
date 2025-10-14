@@ -5,6 +5,7 @@ defmodule Todo.System do
 
   use Supervisor
 
+  @spec start_link() :: {:ok, pid()} | {:error, term()}
   def start_link do
     Supervisor.start_link(__MODULE__, nil)
   end
@@ -21,13 +22,3 @@ defmodule Todo.System do
     Supervisor.init(children, strategy: :one_for_one)
   end
 end
-
-# Todo.System.start_link()
-# alice_pid = Todo.Cache.server_process("Alice's List")
-# bob_pid = Todo.Cache.server_process("Bob's List")
-# Todo.Server.entries(alice_pid, ~D[2024-01-01])
-# Todo.Server.add_entry(alice_pid, %{date: ~D[2024-01-01], title: "Title1"})
-# Todo.Server.add_entry(bob_pid, %{date: ~D[2024-01-01], title: "Title1"})
-# Todo.Server.entries(bob_pid, ~D[2024-01-01])
-# Todo.Server.delete_entry(alice_pid, 3)
-# Process.whereis(Todo.Cache) |> Process.exit(:kill) # пример убийства процесса

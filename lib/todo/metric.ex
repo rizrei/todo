@@ -6,10 +6,12 @@ defmodule Todo.Metrics do
   use Task
   require Logger
 
+  @spec start_link(integer()) :: {:ok, pid()} | {:error, term()}
   def start_link(seconds \\ 10) do
     Task.start_link(__MODULE__, :loop, [seconds])
   end
 
+  @spec loop(integer()) :: no_return()
   def loop(seconds) do
     Process.sleep(:timer.seconds(seconds))
     Logger.info(collect_metrics())

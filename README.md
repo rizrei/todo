@@ -1,21 +1,57 @@
 # Todo
+A small Elixir application for managing todo lists. Stores lists in memory and can persist them to disk via a pool of worker processes.
 
-**TODO: Add description**
+This project is the result of working through the book "Elixir in Action" (3rd Edition) by Saša Jurić.
 
-## Installation
 
-If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `todo` to your list of dependencies in `mix.exs`:
+## Features
 
-```elixir
-def deps do
-  [
-    {:todo, "~> 0.1.0"}
-  ]
-end
+- Add, update, and delete tasks
+- Query tasks by date
+- In-memory list management with optional filesystem persistence
+- Process-per-list model (Todo.Server) managed by Todo.Cache
+- Worker pool for disk IO (Todo.Database / Todo.DatabaseWorker)
+
+
+### Installation
+
+1. Install dependencies and compile:
+
+```sh
+mix deps.get
+mix deps.compile
 ```
 
-Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
-and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/todo>.
+2. Run tests:
+```sh
+mix test
+```
 
+3. Start interactive session:
+```sh
+iex -S mix
+```
+
+
+### Usage
+
+Example usage in IEx:
+
+```elixir
+alice_pid = Todo.Cache.server_process("Alice's List")
+Todo.Server.add_entry(alice_pid, %{date: ~D[2025-01-01], title: "Write documentation"})
+Todo.Server.entries(alice_pid, ~D[2025-01-01])
+Todo.Server.delete_entry(alice_pid, 1)
+```
+
+
+Example usage in shell:
+```sh
+curl -d "" "http://localhost:5454/add_entry?list=bob&date=2018-12-19&title=Shopping"
+curl "http://localhost:5454/entries?list=bob&date=2018-12-19"
+curl -X DELETE "http://localhost:5454/entries/1?list=bob" -v 
+```
+
+## License
+
+This project is licensed under the MIT License.

@@ -9,6 +9,7 @@ defmodule Todo.Database do
   @db_folder Application.compile_env!(:todo, :database_folder)
   @pool_size Application.compile_env!(:todo, :database_pool_size)
 
+  @spec child_spec(any()) :: map()
   def child_spec(_) do
     create_db()
 
@@ -28,6 +29,7 @@ defmodule Todo.Database do
     }
   end
 
+  @spec store(String.t(), term()) :: :ok | [{node(), :ok | {:badrpc, term()}}]
   def store(key, data) do
     :erpc.multicall(
       Node.list([:this, :visible]),
@@ -38,10 +40,12 @@ defmodule Todo.Database do
     )
   end
 
+  @spec store_local(String.t(), term()) :: :ok
   def store_local(key, data) do
     :poolboy.transaction(__MODULE__, &Todo.DatabaseWorker.store(&1, key, data))
   end
 
+  @spec get(String.t()) :: term()
   def get(key) do
     :poolboy.transaction(__MODULE__, &Todo.DatabaseWorker.get(&1, key))
   end

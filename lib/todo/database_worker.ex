@@ -6,14 +6,17 @@ defmodule Todo.DatabaseWorker do
   use GenServer
   require Logger
 
+  @spec start_link(String.t()) :: {:ok, pid()} | {:error, term()}
   def start_link(db_folder) do
     GenServer.start_link(__MODULE__, db_folder)
   end
 
+  @spec get(pid, String.t()) :: term()
   def get(pid, key) do
     GenServer.call(pid, {:get, key})
   end
 
+  @spec store(pid, String.t(), term()) :: :ok
   def store(pid, key, data) do
     GenServer.call(pid, {:store, key, data})
   end
