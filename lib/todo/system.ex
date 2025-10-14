@@ -12,8 +12,7 @@ defmodule Todo.System do
   @impl true
   def init(_) do
     children = [
-      {Todo.Metrics, 5},
-      Todo.ProcessRegistry,
+      # {Todo.Metrics, 5},
       Todo.Database,
       Todo.Cache,
       Todo.Web
@@ -24,11 +23,11 @@ defmodule Todo.System do
 end
 
 # Todo.System.start_link()
-# [{worker_pid, _}] = Registry.lookup(Todo.ProcessRegistry, {Todo.DatabaseWorker, 1})
-# Process.exit(worker_pid, :kill)
 # alice_pid = Todo.Cache.server_process("Alice's List")
 # bob_pid = Todo.Cache.server_process("Bob's List")
 # Todo.Server.entries(alice_pid, ~D[2024-01-01])
 # Todo.Server.add_entry(alice_pid, %{date: ~D[2024-01-01], title: "Title1"})
+# Todo.Server.add_entry(bob_pid, %{date: ~D[2024-01-01], title: "Title1"})
+# Todo.Server.entries(bob_pid, ~D[2024-01-01])
 # Todo.Server.delete_entry(alice_pid, 3)
 # Process.whereis(Todo.Cache) |> Process.exit(:kill) # пример убийства процесса

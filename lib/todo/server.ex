@@ -10,20 +10,27 @@ defmodule Todo.Server do
 
   @timeout :timer.minutes(1)
 
-  def start_link(todo_list_name) do
-    GenServer.start_link(__MODULE__, todo_list_name, name: via_tuple(todo_list_name))
+  def start_link(name) do
+    GenServer.start_link(__MODULE__, name, name: {:global, {__MODULE__, name}})
   end
 
-  def add_entry(todo_server_pid, new_entry) do
-    GenServer.cast(todo_server_pid, {:add_entry, new_entry})
+  def add_entry(pid, new_entry) do
+    GenServer.cast(pid, {:add_entry, new_entry})
   end
 
-  def delete_entry(todo_server_pid, entry_id) do
-    GenServer.cast(todo_server_pid, {:delete_entry, entry_id})
+  def delete_entry(pid, entry_id) do
+    GenServer.cast(pid, {:delete_entry, entry_id})
   end
 
-  def entries(todo_server_pid, date) do
-    GenServer.call(todo_server_pid, {:entries, date})
+  def entries(pid, date) do
+    GenServer.call(pid, {:entries, date})
+  end
+
+  def whereis(name) do
+    case :global.whereis_name({__MODULE__, name}) do
+      :undefined -> nil
+      pid -> pid
+    end
   end
 
   #### Callbacks
@@ -64,9 +71,5 @@ defmodule Todo.Server do
   def handle_info(:timeout, {name, todo_list}) do
     Logger.info("Stopping to-do server for #{name}")
     {:stop, :normal, {name, todo_list}}
-  end
-
-  defp via_tuple(name) do
-    {:via, Registry, {Todo.ProcessRegistry, {__MODULE__, name}}}
   end
 end
